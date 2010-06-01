@@ -31,7 +31,7 @@ namespace Monty.Xdt
                          Target = workingDocument.XPathSelectElement(xpath)
                      };
 
-            // todo: XPathSelectElement could be null from these user-defined conditions
+            // todo: XPathSelectElement could be null from user-defined predicates
 
             foreach (var x in xs)
             {
@@ -43,36 +43,7 @@ namespace Monty.Xdt
 
         static string GetTargetXPath(XElement element)
         {
-            string xpath = "/" + element.Name.LocalName;
-
-            // possible locators: Condition, Match, XPath
-            var locator = element.Attributes(Namespaces.Xdt + "Locator").FirstOrDefault();
-            if (locator != null)
-            {
-                var l = ParseLocator(locator.Value);
-
-                if (l.Kind == "Condition")
-                {
-                    // simply use the specified value as an xpath predicate
-
-                    xpath = xpath + "[" + l.Value + "]";
-                }
-                else if (l.Kind == "Match")
-                {
-                    // a convenience case of the Condition locator, we build the xpath
-                    // predicate for the user by matching on all specified attributes
-                    
-                    var attributeNames = l.Value.Split(',').Select(s => s.Trim());
-                    var attributes = element.Attributes().Where(a => attributeNames.Contains(a.Name.LocalName));
-
-                    xpath = xpath + "[" + attributes.ToConcatenatedString(a =>
-                            "@" + a.Name.LocalName + "='" + a.Value + "'", " and ") + "]";
-                }
-                else
-                {
-                    throw new NotImplementedException(String.Format("The Locator '{0}' is not supported", l.Kind));
-                }
-            }
+            string xpath = "/" + element.Name.LocalName + GetLocatorPredicate(element);
 
             if (element == element.Document.Root)
                 return xpath;
@@ -80,18 +51,40 @@ namespace Monty.Xdt
                 return GetTargetXPath(element.Parent) + xpath;
         }
 
-        static Locator ParseLocator(string locator)
+        static string GetLocatorPredicate(XElement element)
         {
-            var match = Regex.Match(locator, @"(\w*)\((.*)\)");
+            var locatorAttribute = element.Attributes(Namespaces.Xdt + "Locator").FirstOrDefault();
 
-            if (!match.Success)
-                throw new InvalidOperationException(String.Format("Invalid Locator attribute '{0}'.", locator));
-
-            return new Locator
+            if (locatorAttribute == null)
             {
-                Kind = match.Groups[1].Value,
-                Value = match.Groups[2].Value
-            };
+                return String.Empty;
+            }
+            else
+            {
+                var locator = Locator.Parse(locatorAttribute.Value);
+
+                if (locator.Kind == "Condition")
+                {
+                    // use the user-defined value as an xpath predicate
+
+                    return "[" + locator.Value + "]";
+                }
+                else if (locator.Kind == "Match")
+                {
+                    // a convenience case of the Condition locator, build the xpath
+                    // predicate for the user by matching on all specified attributes
+                    
+                    var attributeNames = locator.Value.Split(',').Select(s => s.Trim());
+                    var attributes = element.Attributes().Where(a => attributeNames.Contains(a.Name.LocalName));
+
+                    return "[" + attributes.ToConcatenatedString(a =>
+                        "@" + a.Name.LocalName + "='" + a.Value + "'", " and ") + "]";
+                }
+                else
+                {
+                    throw new NotImplementedException(String.Format("The Locator '{0}' is not supported", locator.Kind));
+                }
+            }
         }
 
         static void TransformElement(XElement e, XElement transformer)

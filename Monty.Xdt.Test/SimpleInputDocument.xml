@@ -7,6 +7,7 @@
   <appSettings>
     <add key="key1" value="value1"/>
     <add key="key2" value="value2-dev"/>
+    <add key="key3" value="value3-dev"/>
   </appSettings>
   <system.net>
     <mailSettings>

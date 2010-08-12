@@ -66,6 +66,9 @@ namespace Monty.Xdt.Test
                 .Element("extra");
 
             Assert.IsTrue(element.Attribute("content").Value == "here");
+
+            // ensure there are no xdt attributes from the transform doc!
+            Assert.IsFalse(output.Descendants().Attributes().Any(a => a.Name.NamespaceName == Namespaces.Xdt));
         }
 
         [TestMethod]

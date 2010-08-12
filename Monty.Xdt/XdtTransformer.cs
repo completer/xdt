@@ -10,35 +10,35 @@ namespace Monty.Xdt
 {
     /// <summary>
     /// Implements a subset of the Microsoft XML document transform language.
-    /// Supports: xdt:Locator="Match(element-name)"
-    ///           xdt:Transform="Replace"
-    ///           xdt:Transform="SetAttributes"
     /// See http://msdn.microsoft.com/en-us/library/dd465326(VS.100,lightweight).aspx
     /// </summary>
     public class XdtTransformer
     {
-        public XDocument Transform(XDocument inputDocument, XDocument transformDocument)
+        public XDocument Transform(XDocument inputDoc, XDocument transformDoc)
         {
-            var workingDocument = new XDocument(inputDocument);
+            var workingDoc = new XDocument(inputDoc);
 
-            // pair each "Transform" element with the element to be transformed
-            var xs = from e in transformDocument.Descendants()
+            // (1) pair each "Transform" element with the element(s)
+            // it targets in the working document
+            var xs = from e in transformDoc.Descendants()
                      where e.Attributes(Namespaces.Xdt + "Transform").Any()
                      let xpath = GetTargetXPath(e)
                      select new
                      {
-                         Transformer = e,
-                         Target = workingDocument.XPathSelectElement(xpath)
+                         TransformElement = e,
+                         TargetElements = workingDoc.XPathSelectElements(xpath)
                      };
 
-            // todo: XPathSelectElement could be null from user-defined predicates
-
+            // (2) apply each transform to its target elements
             foreach (var x in xs)
             {
-                TransformElement(x.Target, x.Transformer);
+                ApplyTransform(x.TransformElement, x.TargetElements);
             }
-            
-            return workingDocument;
+
+            // (3) remove any xdt attributes copied from the transform doc
+            RemoveXdtAttributes(workingDoc);
+
+            return workingDoc;
         }
 
         static string GetTargetXPath(XElement element)
@@ -66,12 +66,11 @@ namespace Monty.Xdt
                 if (locator.Kind == "Condition")
                 {
                     // use the user-defined value as an xpath predicate
-
                     return "[" + locator.Value + "]";
                 }
                 else if (locator.Kind == "Match")
                 {
-                    // a convenience case of the Condition locator, build the xpath
+                    // convenience case of the Condition locator, build the xpath
                     // predicate for the user by matching on all specified attributes
                     
                     var attributeNames = locator.Value.Split(',').Select(s => s.Trim());
@@ -87,32 +86,46 @@ namespace Monty.Xdt
             }
         }
 
-        static void TransformElement(XElement e, XElement transformer)
+        static void ApplyTransform(XElement transformer, IEnumerable<XElement> targetElements)
         {
-            string transform = transformer.Attribute(Namespaces.Xdt + "Transform").Value;
+            if (transformer != null)
+            {
+                string transform = transformer.Attribute(Namespaces.Xdt + "Transform").Value;
 
-            if (transform == "Remove")
-            {
-                e.Remove();
-            }
-            else if (transform == "Replace")
-            {
-                e.ReplaceWith(transformer);
-            }
-            else if (transform == "SetAttributes")
-            {
-                var attributes = from a in transformer.Attributes()
-                                 where a.Name.NamespaceName != Namespaces.Xdt
-                                 select a;
-
-                foreach (var a in attributes)
+                foreach (var e in targetElements)
                 {
-                    e.SetAttributeValue(a.Name, a.Value);
+                    if (transform == "Remove")
+                    {
+                        e.Remove();
+                    }
+                    else if (transform == "Replace")
+                    {
+                        e.ReplaceWith(transformer);
+                    }
+                    else if (transform == "SetAttributes")
+                    {
+                        foreach (var a in transformer.Attributes())
+                        {
+                            e.SetAttributeValue(a.Name, a.Value);
+                        }
+                    }
+                    else
+                    {
+                        throw new NotImplementedException(String.Format("The transform '{0}' is not supported.", transform));
+                    }
                 }
             }
-            else
+        }
+
+        static void RemoveXdtAttributes(XDocument doc)
+        {
+            var xdtAttributes = from a in doc.Descendants().Attributes()
+                                where a.Name.NamespaceName == Namespaces.Xdt
+                                select a;
+
+            foreach (var a in xdtAttributes.ToList())
             {
-                throw new NotImplementedException(String.Format("The transform '{0}' is not supported.", transform));
+                a.Remove();
             }
         }
     }

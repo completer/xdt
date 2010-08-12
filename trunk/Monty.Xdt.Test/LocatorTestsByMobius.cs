@@ -89,7 +89,6 @@ namespace Monty.Xdt.Test
         }
 
         [TestMethod]
-        [Ignore] // todo: enable when XPath is supported
         public void TestXPathLocator()
         {
             var transformDoc = XDocument.Parse(@"

@@ -147,6 +147,28 @@ namespace Monty.Xdt.Test
             Assert.IsTrue(setting2.Attribute("value").Value == "value2-live");
         }
 
+        [TestMethod]
+        public void TestMultipleElementsAreTransformed()
+        {
+            var input = GetInputDocument();
+            var transform = XDocument.Parse(@"
+                <configuration xmlns:xdt=""http://schemas.microsoft.com/XML-Document-Transform"">
+                  <appSettings>
+                    <add value=""ha"" xdt:Transform=""SetAttributes"" />
+                  </appSettings>
+                </configuration>
+                ");
+            var output = new XdtTransformer().Transform(input, transform);
+
+            var settings = output
+                .Element("configuration")
+                .Element("appSettings")
+                .Elements("add");
+
+            Assert.IsTrue(settings.Count() == 3);
+            Assert.IsTrue(settings.SelectMany(e => e.Attributes("value")).All(a => a.Value == "ha"));
+        }
+
         XDocument GetInputDocument()
         {
             return XDocument.Load(@"..\..\..\Monty.Xdt.Test\SimpleInputDocument.xml");            

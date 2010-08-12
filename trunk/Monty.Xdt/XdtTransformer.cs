@@ -43,14 +43,23 @@ namespace Monty.Xdt
 
         static string GetTargetXPath(XElement element)
         {
-            string xpath = "/" + element.Name.LocalName + GetLocatorPredicate(element);
+            var locator = Locator.Parse(element);
 
+            if (locator != null && locator.Kind == "XPath")
+                return locator.Value;
+            else
+                return GetTargetXPathRecursive(element);
+        }
+
+        static string GetTargetXPathRecursive(XElement element)
+        {
+            string xpath = "/" + element.Name.LocalName + GetLocatorPredicate(element);
+            
             if (element == element.Document.Root)
                 return xpath;
             else
-                return GetTargetXPath(element.Parent) + xpath;
+                return GetTargetXPathRecursive(element.Parent) + xpath;
         }
-
         static string GetLocatorPredicate(XElement element)
         {
             var locatorAttribute = element.Attributes(Namespaces.Xdt + "Locator").FirstOrDefault();

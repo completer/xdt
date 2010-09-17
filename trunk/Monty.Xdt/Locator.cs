@@ -9,8 +9,15 @@ namespace Monty.Xdt
 {
     public class Locator
     {
-        public string Kind { get; set; }
-        public string Value { get; set; }
+        /// <summary>
+        /// The type of locator, "Condition", "Match" or "XPath".
+        /// </summary>
+        public string Type { get; set; }
+
+        /// <summary>
+        /// The string specified by the user in parentheses after the type.
+        /// </summary>
+        public string Arguments { get; set; }
 
         public static Locator Parse(XElement element)
         {
@@ -31,8 +38,8 @@ namespace Monty.Xdt
 
             return new Locator
             {
-                Kind = match.Groups[1].Value,
-                Value = match.Groups[2].Value
+                Type = match.Groups[1].Value,
+                Arguments = match.Groups[2].Value
             };
         }
     }

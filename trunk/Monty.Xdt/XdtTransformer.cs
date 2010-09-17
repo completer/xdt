@@ -20,19 +20,16 @@ namespace Monty.Xdt
 
             // (1) pair each "Transform" element with the element(s)
             // it targets in the working document
-            var xs = from e in transformDoc.Descendants()
+            var ts = from e in transformDoc.Descendants()
                      where e.Attributes(Namespaces.Xdt + "Transform").Any()
                      let xpath = GetTargetXPath(e)
-                     select new
-                     {
-                         TransformElement = e,
-                         TargetElements = workingDoc.XPathSelectElements(xpath)
-                     };
+                     let targetElements = workingDoc.XPathSelectElements(xpath)
+                     select Monty.Xdt.Transform.Create(e, targetElements);
 
             // (2) apply each transform to its target elements
-            foreach (var x in xs)
+            foreach (var t in ts)
             {
-                ApplyTransform(x.TransformElement, x.TargetElements);
+                t.Apply();
             }
 
             // (3) remove any xdt attributes copied from the transform doc
@@ -45,21 +42,22 @@ namespace Monty.Xdt
         {
             var locator = Locator.Parse(element);
 
-            if (locator != null && locator.Kind == "XPath")
-                return locator.Value;
+            if (locator != null && locator.Type == "XPath")
+                return locator.Arguments;
             else
-                return GetTargetXPathRecursive(element);
+                return GetImplicitXPathRecursive(element);
         }
 
-        static string GetTargetXPathRecursive(XElement element)
+        static string GetImplicitXPathRecursive(XElement element)
         {
             string xpath = "/" + element.Name.LocalName + GetLocatorPredicate(element);
             
             if (element == element.Document.Root)
                 return xpath;
             else
-                return GetTargetXPathRecursive(element.Parent) + xpath;
+                return GetImplicitXPathRecursive(element.Parent) + xpath;
         }
+
         static string GetLocatorPredicate(XElement element)
         {
             var locatorAttribute = element.Attributes(Namespaces.Xdt + "Locator").FirstOrDefault();
@@ -72,17 +70,17 @@ namespace Monty.Xdt
             {
                 var locator = Locator.Parse(locatorAttribute.Value);
 
-                if (locator.Kind == "Condition")
+                if (locator.Type == "Condition")
                 {
                     // use the user-defined value as an xpath predicate
-                    return "[" + locator.Value + "]";
+                    return "[" + locator.Arguments + "]";
                 }
-                else if (locator.Kind == "Match")
+                else if (locator.Type == "Match")
                 {
                     // convenience case of the Condition locator, build the xpath
                     // predicate for the user by matching on all specified attributes
                     
-                    var attributeNames = locator.Value.Split(',').Select(s => s.Trim());
+                    var attributeNames = locator.Arguments.Split(',').Select(s => s.Trim());
                     var attributes = element.Attributes().Where(a => attributeNames.Contains(a.Name.LocalName));
 
                     return "[" + attributes.ToConcatenatedString(a =>
@@ -90,38 +88,7 @@ namespace Monty.Xdt
                 }
                 else
                 {
-                    throw new NotImplementedException(String.Format("The Locator '{0}' is not supported", locator.Kind));
-                }
-            }
-        }
-
-        static void ApplyTransform(XElement transformer, IEnumerable<XElement> targetElements)
-        {
-            if (transformer != null)
-            {
-                string transform = transformer.Attribute(Namespaces.Xdt + "Transform").Value;
-
-                foreach (var e in targetElements)
-                {
-                    if (transform == "Remove")
-                    {
-                        e.Remove();
-                    }
-                    else if (transform == "Replace")
-                    {
-                        e.ReplaceWith(transformer);
-                    }
-                    else if (transform == "SetAttributes")
-                    {
-                        foreach (var a in transformer.Attributes())
-                        {
-                            e.SetAttributeValue(a.Name, a.Value);
-                        }
-                    }
-                    else
-                    {
-                        throw new NotImplementedException(String.Format("The transform '{0}' is not supported.", transform));
-                    }
+                    throw new NotImplementedException(String.Format("The Locator '{0}' is not supported", locator.Type));
                 }
             }
         }

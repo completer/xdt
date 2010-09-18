@@ -51,6 +51,8 @@
     <Compile Include="Namespaces.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Transform.cs" />
+    <Compile Include="Transforms\InsertBeforeTransform.cs" />
+    <Compile Include="Transforms\InsertTransform.cs" />
     <Compile Include="Transforms\RemoveTransform.cs" />
     <Compile Include="Transforms\ReplaceTransform.cs" />
     <Compile Include="Transforms\SetAttributesTransform.cs" />

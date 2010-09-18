@@ -75,6 +75,29 @@ namespace Monty.Xdt.Test
         }
 
         [TestMethod]
+        public void TestInsertAfterTransform()
+        {
+            // insert an app setting just after the key3 setting
+
+            var input = GetInputDocument();
+            var transform = XDocument.Parse(@"
+                <configuration xmlns:xdt=""http://schemas.microsoft.com/XML-Document-Transform"">
+                  <appSettings>
+                    <add key=""key3.5"" value=""value3.5"" xdt:Transform=""InsertAfter(/configuration/appSettings/add[@key='key3'])"" />
+                  </appSettings>
+                </configuration>
+                ");
+            var output = new XdtTransformer().Transform(input, transform);
+
+            var element = output.Root.Element("appSettings").Elements("add")
+                .Where(e => e.Attribute("key").Value == "key3.5")
+                .Single();
+
+            Assert.IsTrue(element.Attribute("value").Value == "value3.5");
+            Assert.IsTrue(((XElement)element.PreviousNode).Attribute("key").Value == "key3");
+        }
+
+        [TestMethod]
         public void TestRemoveTransform()
         {
             // remove the entire system.web element
@@ -143,6 +166,57 @@ namespace Monty.Xdt.Test
             Assert.IsFalse(output.Descendants().Any(e =>
                 e.Attributes().Any(a =>
                     a.Name.NamespaceName == Namespaces.Xdt)));
+        }
+
+        [TestMethod]
+        public void TestSetAttributesTransformWithArguments()
+        {
+            // change the "debug" attribute to false
+
+            var input = GetInputDocument();
+            var transform = XDocument.Parse(@"
+                <configuration xmlns:xdt=""http://schemas.microsoft.com/XML-Document-Transform"">
+                  <system.web>
+                    <compilation debug=""false"" xdt:Transform=""SetAttributes(debug)"" />
+                  </system.web>
+                </configuration>
+                ");
+            var output = new XdtTransformer().Transform(input, transform);
+
+            var element = output
+                .Element("configuration")
+                .Element("system.web")
+                .Element("compilation");
+
+            Assert.IsTrue(element.Attribute("debug").Value == "false");
+
+            // ensure we haven't accidentally added attributes from the transform document
+            Assert.IsFalse(output.Descendants().Any(e =>
+                e.Attributes().Any(a =>
+                    a.Name.NamespaceName == Namespaces.Xdt)));
+        }
+
+        [TestMethod]
+        public void TestRemoveAttributesTransform()
+        {
+            // remove the "debug" attribute
+
+            var input = GetInputDocument();
+            var transform = XDocument.Parse(@"
+                <configuration xmlns:xdt=""http://schemas.microsoft.com/XML-Document-Transform"">
+                  <system.web>
+                    <compilation xdt:Transform=""RemoveAttributes(debug)"" />
+                  </system.web>
+                </configuration>
+                ");
+            var output = new XdtTransformer().Transform(input, transform);
+
+            var element = output
+                .Element("configuration")
+                .Element("system.web")
+                .Element("compilation");
+
+            Assert.IsTrue(element.Attribute("debug") == null);
         }
 
         [TestMethod]

@@ -36,6 +36,10 @@ namespace Monty.Xdt
 
             // todo: make extensible!
             var classType = Assembly.GetExecutingAssembly().GetType("Monty.Xdt.Transforms." + type + "Transform");
+
+            if (classType == null)
+                throw new NotSupportedException(String.Format("The transform '{0}' is not supported or could not be found.", type));
+
             var transform = (Transform) Activator.CreateInstance(classType);
 
             transform.TransformElement = transformElement;

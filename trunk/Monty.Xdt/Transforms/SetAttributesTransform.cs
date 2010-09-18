@@ -9,14 +9,27 @@ namespace Monty.Xdt.Transforms
     {
         public override void Apply()
         {
-            if (this.Arguments.Any())
-                throw new NotImplementedException("Arguments to the SetAttribute transform are not supported yet.");
-
             foreach (var e in this.GetTargetElements())
             {
-                foreach (var a in this.TransformElement.Attributes())
+                if (this.Arguments.Any())
                 {
-                    e.SetAttributeValue(a.Name, a.Value);
+                    foreach (string arg in this.Arguments)
+                    {
+                        var a = e.Attribute(arg);
+                        var b = this.TransformElement.Attribute(arg);
+
+                        if (a == null || b == null)
+                            throw new InvalidOperationException(String.Format("Couldn't find attribute '{0}' to set.", arg));
+                        else
+                            a.SetValue(b.Value);
+                    }
+                }
+                else
+                {
+                    foreach (var a in this.TransformElement.Attributes())
+                    {
+                        e.SetAttributeValue(a.Name, a.Value);
+                    }
                 }
             }
         }

@@ -54,7 +54,7 @@
     <Compile Include="Transforms\InsertAfterTransform.cs" />
     <Compile Include="Transforms\InsertBeforeTransform.cs" />
     <Compile Include="Transforms\InsertTransform.cs" />
-    <Compile Include="Transforms\RemoveAll.cs" />
+    <Compile Include="Transforms\RemoveAllTransform.cs" />
     <Compile Include="Transforms\RemoveAttributesTransform.cs" />
     <Compile Include="Transforms\RemoveTransform.cs" />
     <Compile Include="Transforms\ReplaceTransform.cs" />

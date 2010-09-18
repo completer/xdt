@@ -12,7 +12,7 @@ namespace Monty.Xdt.Transforms
             if (this.Arguments.Any())
                 throw new NotImplementedException("Arguments to the SetAttribute transform are not supported yet.");
 
-            foreach (var e in this.TargetElements)
+            foreach (var e in this.GetTargetElements())
             {
                 foreach (var a in this.TransformElement.Attributes())
                 {

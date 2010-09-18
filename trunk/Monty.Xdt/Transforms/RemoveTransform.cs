@@ -12,7 +12,7 @@ namespace Monty.Xdt.Transforms
             if (this.Arguments.Any())
                 throw new InvalidOperationException("Arguments to the Remove transform are not supported.");
 
-            foreach (var e in this.TargetElements)
+            foreach (var e in this.GetTargetElements())
             {
                 e.Remove();
             }

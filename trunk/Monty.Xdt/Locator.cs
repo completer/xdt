@@ -42,5 +42,40 @@ namespace Monty.Xdt
                 Arguments = match.Groups[2].Value
             };
         }
+
+        public static string GetLocatorPredicate(XElement element)
+        {
+            var locatorAttribute = element.Attributes(Namespaces.Xdt + "Locator").FirstOrDefault();
+
+            if (locatorAttribute == null)
+            {
+                return String.Empty;
+            }
+            else
+            {
+                var locator = Locator.Parse(locatorAttribute.Value);
+
+                if (locator.Type == "Condition")
+                {
+                    // use the user-defined value as an xpath predicate
+                    return "[" + locator.Arguments + "]";
+                }
+                else if (locator.Type == "Match")
+                {
+                    // convenience case of the Condition locator, build the xpath
+                    // predicate for the user by matching on all specified attributes
+
+                    var attributeNames = locator.Arguments.Split(',').Select(s => s.Trim());
+                    var attributes = element.Attributes().Where(a => attributeNames.Contains(a.Name.LocalName));
+
+                    return "[" + attributes.ToConcatenatedString(a =>
+                        "@" + a.Name.LocalName + "='" + a.Value + "'", " and ") + "]";
+                }
+                else
+                {
+                    throw new NotImplementedException(String.Format("The Locator '{0}' is not supported", locator.Type));
+                }
+            }
+        }
     }
 }

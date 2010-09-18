@@ -29,6 +29,52 @@ namespace Monty.Xdt.Test
         }
 
         [TestMethod]
+        public void TestInsertTransform()
+        {
+            // insert an app setting
+
+            var input = GetInputDocument();
+            var transform = XDocument.Parse(@"
+                <configuration xmlns:xdt=""http://schemas.microsoft.com/XML-Document-Transform"">
+                  <appSettings>
+                    <add key=""key4"" value=""value4"" xdt:Transform=""Insert"" />
+                  </appSettings>
+                </configuration>
+                ");
+            var output = new XdtTransformer().Transform(input, transform);
+
+            var element = output.Root.Element("appSettings").Elements("add")
+                .Where(e => e.Attribute("key").Value == "key4")
+                .Single();
+
+            Assert.IsTrue(element.Attribute("value").Value == "value4");
+        }
+
+        [TestMethod]
+        public void TestInsertBeforeTransform()
+        {
+            // insert an app setting just before the key3 setting
+
+            var input = GetInputDocument();
+            var transform = XDocument.Parse(@"
+                <configuration xmlns:xdt=""http://schemas.microsoft.com/XML-Document-Transform"">
+                  <appSettings>
+                    <add key=""key2.5"" value=""value2.5"" xdt:Transform=""InsertBefore(/configuration/appSettings/add[@key='key3'])"" />
+                  </appSettings>
+                </configuration>
+                ");
+            var output = new XdtTransformer().Transform(input, transform);
+
+            var element = output.Root.Element("appSettings").Elements("add")
+                .Where(e => e.Attribute("key").Value == "key2.5")
+                .Single();
+
+            Assert.IsTrue(element.Attribute("value").Value == "value2.5");
+            Assert.IsTrue(((XElement) element.PreviousNode).Attribute("key").Value == "key2");
+            Assert.IsTrue(((XElement) element.NextNode).Attribute("key").Value == "key3");
+        }
+
+        [TestMethod]
         public void TestRemoveTransform()
         {
             // remove the entire system.web element

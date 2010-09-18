@@ -45,7 +45,7 @@ namespace Monty.Xdt.Test
         [TestMethod]
         public void TestRootElement()
         {
-            string xpath = XdtTransformer_Accessor.GetTargetXPath(this.doc.Root);
+            string xpath = Transform_Accessor.GetTargetXPath(this.doc.Root);
             Assert.IsTrue(xpath == "/configuration");
 
             var element = this.doc.XPathSelectElement(xpath);
@@ -62,7 +62,7 @@ namespace Monty.Xdt.Test
                 .Element("smtp")
                 .Element("network");
 
-            string xpath = XdtTransformer_Accessor.GetTargetXPath(element);
+            string xpath = Transform_Accessor.GetTargetXPath(element);
             Assert.AreEqual(element, this.doc.XPathSelectElement(xpath));
         }
 
@@ -82,7 +82,7 @@ namespace Monty.Xdt.Test
                 .Element("appSettings")
                 .Element("add");
 
-            string xpath = XdtTransformer_Accessor.GetTargetXPath(transformElement);
+            string xpath = Transform_Accessor.GetTargetXPath(transformElement);
             Assert.AreEqual(xpath, "/configuration/appSettings/add[@key='key1' or @anotherAttribute='something']");
 
             var workingElement = this.doc
@@ -109,7 +109,7 @@ namespace Monty.Xdt.Test
                 .Element("appSettings")
                 .Element("add");
 
-            string xpath = XdtTransformer_Accessor.GetTargetXPath(transformElement);
+            string xpath = Transform_Accessor.GetTargetXPath(transformElement);
             Assert.AreEqual(xpath, "/configuration/appSettings[@attribute!='value']/add[@key='key1']");
         }
 
@@ -129,7 +129,7 @@ namespace Monty.Xdt.Test
                 .Element("appSettings")
                 .Element("add");
 
-            string xpath = XdtTransformer_Accessor.GetTargetXPath(transformElement);
+            string xpath = Transform_Accessor.GetTargetXPath(transformElement);
             Assert.AreEqual(xpath, "/configuration/appSettings/add[@key='key1']");
 
             var workingElement = this.doc

@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Monty.Xdt.Transforms
 {
-    public class RemoveAll : Transform
+    public class RemoveAllTransform : Transform
     {
         public override void Apply()
         {

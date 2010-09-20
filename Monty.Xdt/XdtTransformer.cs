@@ -16,7 +16,7 @@ namespace Monty.Xdt
 
             // (1) create a transform object for each "Transform" element
             var ts = from e in transformDoc.Descendants()
-                     where e.Attributes(Namespaces.Xdt + "Transform").Any()
+                     from a in e.Attributes(Namespaces.Xdt + "Transform")
                      select Monty.Xdt.Transform.Create(e, workingDoc);
 
             // (2) apply each transform to its target elements

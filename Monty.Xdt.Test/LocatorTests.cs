@@ -139,5 +139,23 @@ namespace Monty.Xdt.Test
                 .Single(e => e.Attribute("key").Value == "key1");
             Assert.AreEqual(workingElement, this.doc.XPathSelectElement(xpath));
         }
+
+        [TestMethod]
+        public void TestXPathLocator()
+        {
+            // all the mailsettings sections anywhere in the doc will be removed
+
+            var transform = XDocument.Parse(@"
+                <configuration xmlns:xdt=""http://schemas.microsoft.com/XML-Document-Transform"">
+                    <couldbe > 
+                        <anything xdt:Transform=""RemoveAll"" xdt:Locator=""XPath(//mailsettings)"" /> 
+                    </couldbe>
+                </configuration>
+                ");
+
+            var output = new XdtTransformer().Transform(this.doc, transform);
+
+            Assert.IsFalse(output.Descendants("mailsettings").Any());
+        }
     }
 }

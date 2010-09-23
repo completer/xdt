@@ -9,10 +9,15 @@ namespace Monty.Xdt.Transforms
     {
         public override void Apply()
         {
+            var targets = this.GetTargetElements();
+
             if (this.Arguments.Any())
                 throw new InvalidOperationException("Arguments to the Remove transform are not supported.");
 
-            this.GetTargetElements().First().Remove();
+            if (targets.Any())
+            {
+                this.GetTargetElements().First().Remove();
+            }
         }
     }
 }

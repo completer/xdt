@@ -19,10 +19,12 @@ namespace Monty.Xdt.Transforms
 
         public override void Apply()
         {
-            if (this.GetTargetElements().Count() != 1)
-                throw new InvalidOperationException("You must select exactly one target element for the InsertBefore transform.");
+            var targets = this.GetTargetElements();
 
-            this.GetTargetElements().Single().AddAfterSelf(this.TransformElement);
+            if (targets.Count() != 1)
+                throw new InvalidOperationException("You must select exactly one target element for the InsertAfter transform.");
+
+            targets.Single().AddAfterSelf(this.TransformElement);
         }
     }
 }

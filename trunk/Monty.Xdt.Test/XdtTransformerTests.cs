@@ -302,6 +302,9 @@ namespace Monty.Xdt.Test
                   <blah xmlns=""http://test.com"">
                     <add key=""key2"" value=""value2"" />
                   </blah>
+                  <flop xmlns=""http://test.com"">
+                    <add key=""key3"" value=""value3"" xmlns="""" />
+                  </flop>
                 </configuration>
                 ");
 
@@ -313,20 +316,32 @@ namespace Monty.Xdt.Test
                   <blah xmlns=""http://test.com"">
                     <add key=""key2"" value=""value2-new"" xdt:Locator=""Match(key)"" xdt:Transform=""SetAttributes"" />
                   </blah>
+                  <flop xmlns=""http://test.com"">
+                    <add key=""key3"" value=""value3-new"" xmlns="""" xdt:Locator=""Match(key)"" xdt:Transform=""SetAttributes"" />
+                  </flop>
                 </configuration>
                 ");
             var output = new XdtTransformer().Transform(input, transform);
 
             XNamespace ns = "http://test.com";
 
-            var element = output
+            var element2 = output
                 .Element("configuration")
                 .Elements(ns + "blah")
                 .Elements(ns + "add")
                 .Single(e => e.Attribute("key").Value == "key2");
 
-            Assert.IsTrue(element.Name.NamespaceName == ns);
-            Assert.IsTrue(element.Attribute("value").Value == "value2-new");
+            Assert.IsTrue(element2.Name.NamespaceName == ns);
+            Assert.IsTrue(element2.Attribute("value").Value == "value2-new");
+
+            var element3 = output
+                .Element("configuration")
+                .Elements(ns + "flop")
+                .Elements("add")
+                .Single(e => e.Attribute("key").Value == "key3");
+
+            Assert.IsTrue(element3.Name.NamespaceName == String.Empty);
+            Assert.IsTrue(element3.Attribute("value").Value == "value3-new");
         }
 
         XDocument GetInputDocument()

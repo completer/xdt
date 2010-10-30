@@ -5,6 +5,8 @@ using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.IO;
 using System.Xml.Linq;
+using System.Xml;
+using System.Xml.XPath;
 
 namespace Monty.Xdt.Test
 {
@@ -287,6 +289,44 @@ namespace Monty.Xdt.Test
 
             Assert.IsTrue(settings.Count() == 3);
             Assert.IsTrue(settings.SelectMany(e => e.Attributes("value")).All(a => a.Value == "ha"));
+        }
+
+        [TestMethod]
+        public void TestInputDocumentsWithXmlNamespacesWorkAsExpected()
+        {
+            var input = XDocument.Parse(@"
+                <configuration>
+                  <appSettings>
+                    <add key=""key1"" value=""value1"" />
+                  </appSettings>
+                  <blah xmlns=""http://test.com"">
+                    <add key=""key2"" value=""value2"" />
+                  </blah>
+                </configuration>
+                ");
+
+            var transform = XDocument.Parse(@"
+                <configuration xmlns:xdt=""http://schemas.microsoft.com/XML-Document-Transform"">
+                  <appSettings>
+                    <add value=""value1-new"" xdt:Transform=""SetAttributes"" />
+                  </appSettings>
+                  <blah xmlns=""http://test.com"">
+                    <add key=""key2"" value=""value2-new"" xdt:Locator=""Match(key)"" xdt:Transform=""SetAttributes"" />
+                  </blah>
+                </configuration>
+                ");
+            var output = new XdtTransformer().Transform(input, transform);
+
+            XNamespace ns = "http://test.com";
+
+            var element = output
+                .Element("configuration")
+                .Elements(ns + "blah")
+                .Elements(ns + "add")
+                .Single(e => e.Attribute("key").Value == "key2");
+
+            Assert.IsTrue(element.Name.NamespaceName == ns);
+            Assert.IsTrue(element.Attribute("value").Value == "value2-new");
         }
 
         XDocument GetInputDocument()

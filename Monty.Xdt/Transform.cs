@@ -6,6 +6,7 @@ using System.Xml.Linq;
 using System.Xml.XPath;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using System.Xml;
 
 namespace Monty.Xdt
 {
@@ -51,28 +52,49 @@ namespace Monty.Xdt
 
         public virtual IEnumerable<XElement> GetTargetElements()
         {
-            string xpath = Transform.GetTargetXPath(this.TransformElement);
-            return this.WorkingDoc.XPathSelectElements(xpath);
+            var xpath = Transform.GetTargetXPath(this.TransformElement);
+            return this.WorkingDoc.XPathSelectElements(xpath.Path, xpath.Resolver);
         }
 
-        protected static string GetTargetXPath(XElement element)
+        protected static XPathResult GetTargetXPath(XElement element)
         {
             var locator = Locator.Parse(element);
 
             if (locator != null && locator.Type == "XPath")
-                return locator.Arguments;
+            {
+                return new XPathResult
+                {
+                    Path = locator.Arguments,
+                    Resolver = null
+                };
+            }
             else
-                return Transform.GetTargetXPathRecursive(element);
+            {
+                var nsManager = new XmlNamespacePrefixManager(new XmlNamespaceManager(new NameTable()));
+
+                return new XPathResult
+                {
+                    Path = Transform.GetTargetXPathRecursive(element, nsManager),
+                    Resolver = nsManager.Manager
+                };
+            }
         }
 
-        protected static string GetTargetXPathRecursive(XElement element)
+        protected static string GetTargetXPathRecursive(
+            XElement element,
+            XmlNamespacePrefixManager nsManager)
         {
-            string xpath = "/" + element.Name.LocalName + Locator.GetLocatorPredicate(element);
+            string prefix = nsManager.AddNamespace(element.Name.NamespaceName);
+
+            if (prefix != String.Empty)
+                prefix += ":";
+
+            string xpath = "/" + prefix + element.Name.LocalName + Locator.GetLocatorPredicate(element);
 
             if (element == element.Document.Root)
                 return xpath;
             else
-                return Transform.GetTargetXPathRecursive(element.Parent) + xpath;
+                return Transform.GetTargetXPathRecursive(element.Parent, nsManager) + xpath;
         }
     }
 }

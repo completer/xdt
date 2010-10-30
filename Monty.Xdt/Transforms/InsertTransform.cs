@@ -12,8 +12,9 @@ namespace Monty.Xdt.Transforms
         public override IEnumerable<XElement> GetTargetElements()
         {
             // use the parent in case there are no selected elements in the input doc
-            string xpath = Transform.GetTargetXPath(this.TransformElement.Parent);
-            return this.WorkingDoc.XPathSelectElements(xpath);
+            var xpath = Transform.GetTargetXPath(this.TransformElement.Parent);
+
+            return this.WorkingDoc.XPathSelectElements(xpath.Path, xpath.Resolver);
         }
 
         public override void Apply()

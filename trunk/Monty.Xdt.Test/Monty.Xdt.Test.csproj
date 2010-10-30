@@ -47,6 +47,7 @@
     <Compile Include="LocatorTestsByMobius.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="XdtTransformerTests.cs" />
+    <Compile Include="XmlNamespacePrefixManagerTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="SimpleInputDocument.xml" />

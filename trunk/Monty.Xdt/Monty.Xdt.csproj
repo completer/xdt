@@ -60,6 +60,8 @@
     <Compile Include="Transforms\ReplaceTransform.cs" />
     <Compile Include="Transforms\SetAttributesTransform.cs" />
     <Compile Include="XdtTransformer.cs" />
+    <Compile Include="XmlNamespacePrefixManager.cs" />
+    <Compile Include="XPathResult.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

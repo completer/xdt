@@ -21,26 +21,32 @@ namespace Monty.Xdt
         /// Adds the namespace to the wrapped XmlNamespaceManager and returns a prefix.
         /// </summary>
         /// <returns>
-        /// The prefix will be the empty string for the empty namespace, otherwise some
+        /// The prefix will be the empty string for the empty namespace, otherwise a
         /// string different to the prefixes given to previously added namespaces.
         /// </returns>
         public string AddNamespace(string ns)
         {
-            // add any new namespace to the namespace set
-            if (!this.set.Contains(ns))
-                this.set.Add(ns);
-            
-            // determine a unique prefix for the namespace
-            // (based on its index in the set)
-            string prefix = String.IsNullOrEmpty(ns)
-                ? String.Empty
-                : new String('a', this.set.IndexOf(ns) + 1);
+            if (String.IsNullOrEmpty(ns))
+            {
+                // xpath will treat no prefix as the empty namespace,
+                // so no need to do anything here
+                return String.Empty;
+            }
+            else
+            {
+                // add any new namespace to the namespace set
+                if (!this.set.Contains(ns))
+                    this.set.Add(ns);
 
-            // ensure the prefix -> namespace mapping is registered
-            // with the wrapped namespace manager/resolver
-            this.Manager.AddNamespace(prefix, ns);
+                // determine a unique prefix for the namespace
+                string prefix = new String('a', this.set.IndexOf(ns) + 1);
 
-            return prefix;
+                // ensure the prefix -> namespace mapping is registered
+                // with the wrapped namespace manager/resolver
+                this.Manager.AddNamespace(prefix, ns);
+
+                return prefix;
+            }
         }
     }
 }

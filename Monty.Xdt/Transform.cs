@@ -65,16 +65,17 @@ namespace Monty.Xdt
                 return new XPathResult
                 {
                     Expression = locator.Arguments,
-                    Resolver = null
+                    Resolver = new XmlNamespaceManager(new NameTable())
                 };
             }
             else
             {
                 var nsManager = new XmlNamespacePrefixManager(new XmlNamespaceManager(new NameTable()));
+                string expression = Transform.GetTargetXPathRecursive(element, nsManager);
 
                 return new XPathResult
                 {
-                    Expression = Transform.GetTargetXPathRecursive(element, nsManager),
+                    Expression = expression,
                     Resolver = nsManager.Manager
                 };
             }

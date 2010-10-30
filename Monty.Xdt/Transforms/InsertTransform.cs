@@ -13,8 +13,7 @@ namespace Monty.Xdt.Transforms
         {
             // use the parent in case there are no selected elements in the input doc
             var xpath = Transform.GetTargetXPath(this.TransformElement.Parent);
-
-            return this.WorkingDoc.XPathSelectElements(xpath.Path, xpath.Resolver);
+            return this.WorkingDoc.XPathSelectElements(xpath.Expression, xpath.Resolver);
         }
 
         public override void Apply()

@@ -8,7 +8,7 @@ namespace Monty.Xdt
 {
     public class XPathResult
     {
-        public string                Path     { get; set; }
-        public IXmlNamespaceResolver Resolver { get; set; }
+        public string                Expression { get; set; }
+        public IXmlNamespaceResolver Resolver   { get; set; }
     }
 }

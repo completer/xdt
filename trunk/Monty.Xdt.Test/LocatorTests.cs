@@ -48,7 +48,7 @@ namespace Monty.Xdt.Test
             var xpath = Transform_Accessor.GetTargetXPath(this.doc.Root);
             //Assert.IsTrue(xpath.XPath == "/configuration");
 
-            var element = this.doc.XPathSelectElement(xpath.Path, xpath.Resolver);
+            var element = this.doc.XPathSelectElement(xpath.Expression, xpath.Resolver);
             Assert.IsNotNull(element);
             Assert.IsTrue(element == this.doc.Root);
         }
@@ -63,7 +63,7 @@ namespace Monty.Xdt.Test
                 .Element("network");
 
             var xpath = Transform_Accessor.GetTargetXPath(element);
-            Assert.AreEqual(element, this.doc.XPathSelectElement(xpath.Path, xpath.Resolver));
+            Assert.AreEqual(element, this.doc.XPathSelectElement(xpath.Expression, xpath.Resolver));
         }
 
         [TestMethod]
@@ -83,14 +83,14 @@ namespace Monty.Xdt.Test
                 .Element("add");
 
             var xpath = Transform_Accessor.GetTargetXPath(transformElement);
-            Assert.AreEqual(xpath.Path, "/configuration/appSettings/add[@key='key1' or @anotherAttribute='something']");
+            Assert.AreEqual(xpath.Expression, "/configuration/appSettings/add[@key='key1' or @anotherAttribute='something']");
 
             var workingElement = this.doc
                 .Element("configuration")
                 .Element("appSettings")
                 .Elements("add")
                 .Single(e => e.Attribute("key").Value == "key1");
-            Assert.AreEqual(workingElement, this.doc.XPathSelectElement(xpath.Path));
+            Assert.AreEqual(workingElement, this.doc.XPathSelectElement(xpath.Expression));
         }
 
         [TestMethod]
@@ -110,7 +110,7 @@ namespace Monty.Xdt.Test
                 .Element("add");
 
             var xpath = Transform_Accessor.GetTargetXPath(transformElement);
-            Assert.AreEqual(xpath.Path, "/configuration/appSettings[@attribute!='value']/add[@key='key1']");
+            Assert.AreEqual(xpath.Expression, "/configuration/appSettings[@attribute!='value']/add[@key='key1']");
         }
 
         [TestMethod]
@@ -130,14 +130,14 @@ namespace Monty.Xdt.Test
                 .Element("add");
 
             var xpath = Transform_Accessor.GetTargetXPath(transformElement);
-            Assert.AreEqual(xpath.Path, "/configuration/appSettings/add[@key='key1']");
+            Assert.AreEqual(xpath.Expression, "/configuration/appSettings/add[@key='key1']");
 
             var workingElement = this.doc
                 .Element("configuration")
                 .Element("appSettings")
                 .Elements("add")
                 .Single(e => e.Attribute("key").Value == "key1");
-            Assert.AreEqual(workingElement, this.doc.XPathSelectElement(xpath.Path));
+            Assert.AreEqual(workingElement, this.doc.XPathSelectElement(xpath.Expression));
         }
 
         [TestMethod]

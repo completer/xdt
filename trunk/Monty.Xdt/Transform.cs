@@ -53,7 +53,7 @@ namespace Monty.Xdt
         public virtual IEnumerable<XElement> GetTargetElements()
         {
             var xpath = Transform.GetTargetXPath(this.TransformElement);
-            return this.WorkingDoc.XPathSelectElements(xpath.Path, xpath.Resolver);
+            return this.WorkingDoc.XPathSelectElements(xpath.Expression, xpath.Resolver);
         }
 
         protected static XPathResult GetTargetXPath(XElement element)
@@ -64,7 +64,7 @@ namespace Monty.Xdt
             {
                 return new XPathResult
                 {
-                    Path = locator.Arguments,
+                    Expression = locator.Arguments,
                     Resolver = null
                 };
             }
@@ -74,7 +74,7 @@ namespace Monty.Xdt
 
                 return new XPathResult
                 {
-                    Path = Transform.GetTargetXPathRecursive(element, nsManager),
+                    Expression = Transform.GetTargetXPathRecursive(element, nsManager),
                     Resolver = nsManager.Manager
                 };
             }

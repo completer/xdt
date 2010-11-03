@@ -28,8 +28,8 @@ namespace Monty.Xdt.Test
             string ns2 = "http://test2.com";
 
             string prefix1 = manager.AddNamespace(ns1);
-            string prefix2 = manager.AddNamespace(ns1);
-            Assert.AreNotEqual(ns1, ns2);
+            string prefix2 = manager.AddNamespace(ns2);
+            Assert.AreNotEqual(prefix1, prefix2);
         }
     }
 }

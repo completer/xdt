@@ -1,0 +1,8 @@
+language: csharp
+solution: Monty.Xdt.sln
+install:
+  - nuget restore Monty.Xdt.sln
+  - nuget install NUnit.Runners -Version 2.6.4 -OutputDirectory testrunner
+script:
+  - xbuild /p:Configuration=Release Monty.Xdt.sln
+  - mono ./testrunner/NUnit.Runners.2.6.4/tools/nunit-console.exe ./Monty.Xdt.Tests/bin/Release/Monty.Xdt.Tests.dll
